@@ -1,0 +1,19 @@
+src/spinner.ts
+  s_1e9d46eace50b0::t_2bf84e844594fe 53-54,60-61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "330e8b1d28c10770dfab47e92872a954c3bff48d",
+  "prompts": {},
+  "sessions": {
+    "s_1e9d46eace50b0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d2578de4-e26f-4a00-9382-8b9f34dafaa8",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Greggory Caines <gregg@caines.ca>"
+    }
+  }
+}
