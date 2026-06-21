@@ -63,6 +63,51 @@ h1 {
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
 }
 
+.ops {
+  display: inline-flex;
+  gap: 0.4rem;
+  margin-top: 1.5rem;
+  padding: 0.3rem;
+  background: #e7e5e4;
+  border-radius: 999px;
+}
+
+.ops label {
+  cursor: pointer;
+}
+
+.ops input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ops span {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  font-size: 1.4rem;
+  font-weight: 800;
+  border-radius: 999px;
+  color: #1d1d1d;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.ops label:hover span {
+  background: #d6d3d1;
+}
+
+.ops input:checked + span {
+  background: #1d1d1d;
+  color: #fff;
+}
+
+.ops input:focus-visible + span {
+  outline: 3px solid #457b9d;
+  outline-offset: 2px;
+}
+
 #spin-btn {
   margin-top: 1.75rem;
   padding: 0.7rem 2.2rem;

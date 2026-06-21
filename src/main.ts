@@ -4,6 +4,14 @@ const SEGMENTS = 12;
 const COUNTDOWN_SECONDS = 15;
 const HISTORY_LIMIT = 15; // only the latest 15 questions count toward the score
 
+type OpKey = "add" | "subtract" | "multiply" | "divide";
+const SYMBOLS: Record<OpKey, string> = {
+  add: "+",
+  subtract: "−",
+  multiply: "×",
+  divide: "÷",
+};
+
 const wheelsEl = document.querySelector<HTMLDivElement>("#wheels")!;
 const spinBtn = document.querySelector<HTMLButtonElement>("#spin-btn")!;
 const questionEl = document.querySelector<HTMLParagraphElement>("#question")!;
@@ -23,10 +31,15 @@ const left = makeWheel();
 const right = makeWheel();
 
 const history: boolean[] = []; // true = answered correctly
-let current: { a: number; b: number } | null = null;
+let current: { a: number; b: number; answer: number; symbol: string } | null = null;
 let resolved = true; // no live question to answer yet
 let timerId: number | null = null;
 let remaining = 0;
+
+function selectedOp(): OpKey {
+  const checked = document.querySelector<HTMLInputElement>('input[name="op"]:checked');
+  return (checked?.value as OpKey) ?? "multiply";
+}
 
 /** Pick two distinct numbers in 1..SEGMENTS. */
 function pickTwoDistinct(): [number, number] {
@@ -70,6 +83,33 @@ function renderScore() {
   scoreEl.textContent = `Score: ${correct}/${total} correct — ${pct}% (last ${total})`;
 }
 
+/**
+ * Spin both wheels and build a question for the chosen operation.
+ * - subtraction: always larger − smaller (so the result is never negative)
+ * - division: keep spinning until larger ÷ smaller is a whole number
+ */
+async function spinForOperation(
+  op: OpKey,
+): Promise<{ a: number; b: number; answer: number }> {
+  if (op === "divide") {
+    let ra: number;
+    let rb: number;
+    do {
+      [ra, rb] = await Promise.all([left.spin(), right.spin()]);
+    } while (ra === rb || Math.max(ra, rb) % Math.min(ra, rb) !== 0);
+    const a = Math.max(ra, rb);
+    const b = Math.min(ra, rb);
+    return { a, b, answer: a / b };
+  }
+
+  let [a, b] = pickTwoDistinct();
+  if (op === "subtract" && b > a) [a, b] = [b, a]; // larger on the left
+  const [ra, rb] = await Promise.all([left.spin(a), right.spin(b)]);
+  const answer =
+    op === "add" ? ra + rb : op === "subtract" ? ra - rb : ra * rb;
+  return { a: ra, b: rb, answer };
+}
+
 async function spinBoth() {
   if (left.spinning || right.spinning || !resolved) return;
 
@@ -85,12 +125,13 @@ async function spinBoth() {
   questionEl.textContent = "Spinning…";
   timerEl.hidden = true;
 
-  const [a, b] = pickTwoDistinct();
-  const [ra, rb] = await Promise.all([left.spin(a), right.spin(b)]);
-  current = { a: ra, b: rb };
+  const op = selectedOp();
+  const symbol = SYMBOLS[op];
+  const { a, b, answer } = await spinForOperation(op);
+  current = { a, b, answer, symbol };
 
   // Question decided: open the field and start the countdown.
-  questionEl.textContent = `${ra} × ${rb} = ?`;
+  questionEl.textContent = `${a} ${symbol} ${b} = ?`;
   inputEl.disabled = false;
   checkBtn.disabled = false;
   answerBtn.hidden = false;
@@ -105,9 +146,8 @@ function resolveQuestion(userAnswer: number | null, how: Outcome) {
 
   resolved = true;
   stopTimer();
-  const { a, b } = current;
-  const product = a * b;
-  const correct = userAnswer === product;
+  const { a, b, answer, symbol } = current;
+  const correct = userAnswer === answer;
 
   history.push(correct);
   while (history.length > HISTORY_LIMIT) history.shift();
@@ -118,14 +158,13 @@ function resolveQuestion(userAnswer: number | null, how: Outcome) {
   timerEl.hidden = true;
   spinBtn.disabled = false;
 
+  const equation = `${a} ${symbol} ${b} = ${answer}`;
   if (how === "answer") {
-    questionEl.textContent = correct
-      ? `Correct! ${a} × ${b} = ${product}`
-      : `Not quite — ${a} × ${b} = ${product}`;
+    questionEl.textContent = correct ? `Correct! ${equation}` : `Not quite — ${equation}`;
   } else if (how === "timeout") {
-    questionEl.textContent = `⏰ Time's up! ${a} × ${b} = ${product}`;
+    questionEl.textContent = `⏰ Time's up! ${equation}`;
   } else {
-    questionEl.textContent = `${a} × ${b} = ${product}`;
+    questionEl.textContent = equation;
   }
   questionEl.className = correct ? "correct" : "incorrect";
   renderScore();
