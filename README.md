@@ -13,8 +13,9 @@ multiplication question (`a × b = ?`). Then:
 - Your **score** is shown as a percentage correct over the latest **15**
   questions.
 
-For division, a single wheel spins and the divisor is chosen as a random
-factor of that number, so the answer is always a whole number.
+For division, a single dedicated wheel containing every non-prime number from
+1 to 144 spins, and the divisor is chosen as a random factor of that number,
+so the answer is always a whole number.
 
 Revealing the answer or letting the timer run out counts the question as
 incorrect.

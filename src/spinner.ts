@@ -1,6 +1,4 @@
-const SEGMENTS = 12;
-const SEGMENT_ANGLE = 360 / SEGMENTS; // 30°
-const NUMBERS = Array.from({ length: SEGMENTS }, (_, i) => i + 1); // 1..12
+const DEFAULT_NUMBERS = Array.from({ length: 12 }, (_, i) => i + 1); // 1..12
 const COLORS = [
   "#e63946", "#f4a261", "#2a9d8f", "#457b9d",
   "#e76f51", "#8ab17d", "#e9c46a", "#9d4edd",
@@ -29,43 +27,58 @@ function el<K extends keyof SVGElementTagNameMap>(
 export interface Spinner {
   /**
    * Spin the wheel; resolves with the number under the pointer when it stops.
-   * Pass a number (1..SEGMENTS) to land on a specific value.
+   * Pass a value present on the wheel to land on it; omit for a random landing.
    */
   spin(forcedNumber?: number): Promise<number>;
   spinning: boolean;
 }
 
-export function createSpinner(mount: HTMLElement): Spinner {
+export interface SpinnerOptions {
+  /** The numbers shown on the wheel, in order. Defaults to 1..12. */
+  numbers?: number[];
+}
+
+export function createSpinner(mount: HTMLElement, options: SpinnerOptions = {}): Spinner {
+  const numbers = options.numbers ?? DEFAULT_NUMBERS;
+  const segments = numbers.length;
+  const segmentAngle = 360 / segments;
+
+  // Scale labels and outlines so dense wheels stay legible.
+  const fontSize = Math.max(4, Math.min(22, segmentAngle * 0.7));
+  const labelRadius = RADIUS * (segments > 24 ? 0.8 : 0.66);
+  const strokeWidth = segments > 24 ? 0.3 : 1;
+
   const svg = el("svg", { viewBox: "0 0 200 200", class: "wheel-svg" });
 
   // Rotating group holds the wedges + labels.
   const wheel = el("g", { class: "wheel" });
 
-  for (let i = 0; i < SEGMENTS; i++) {
-    const start = i * SEGMENT_ANGLE;
-    const end = start + SEGMENT_ANGLE;
+  for (let i = 0; i < segments; i++) {
+    const start = i * segmentAngle;
+    const end = start + segmentAngle;
     const [x0, y0] = pointAt(start, RADIUS);
     const [x1, y1] = pointAt(end, RADIUS);
     const path = el("path", {
       d: `M ${CENTER} ${CENTER} L ${x0} ${y0} A ${RADIUS} ${RADIUS} 0 0 1 ${x1} ${y1} Z`,
-      fill: COLORS[i],
+      fill: COLORS[i % COLORS.length],
       stroke: "#1d1d1d",
-      "stroke-width": 1,
+      "stroke-width": strokeWidth,
     });
     wheel.appendChild(path);
 
-    const mid = start + SEGMENT_ANGLE / 2;
-    const [lx, ly] = pointAt(mid, RADIUS * 0.66);
+    const mid = start + segmentAngle / 2;
+    const [lx, ly] = pointAt(mid, labelRadius);
     const label = el("text", {
       x: lx,
       y: ly,
       "text-anchor": "middle",
       "dominant-baseline": "central",
+      "font-size": fontSize,
       // Rotate the digit to align with the slice's tangent (perpendicular to its radius).
       transform: `rotate(${mid} ${lx} ${ly})`,
       class: "wheel-label",
     });
-    label.textContent = String(NUMBERS[i]);
+    label.textContent = String(numbers[i]);
     wheel.appendChild(label);
   }
 
@@ -89,14 +102,14 @@ export function createSpinner(mount: HTMLElement): Spinner {
     spin(forcedNumber?: number) {
       if (api.spinning) return Promise.resolve(currentNumber());
 
-      const targetIndex =
-        forcedNumber != null
-          ? (forcedNumber - 1 + SEGMENTS) % SEGMENTS
-          : Math.floor(Math.random() * SEGMENTS);
+      let targetIndex =
+        forcedNumber != null ? numbers.indexOf(forcedNumber) : Math.floor(Math.random() * segments);
+      if (targetIndex < 0) targetIndex = 0;
+
       // Land the centre of the chosen wedge under the top pointer, with a little jitter.
-      const jitter = (Math.random() - 0.5) * (SEGMENT_ANGLE * 0.7);
+      const jitter = (Math.random() - 0.5) * (segmentAngle * 0.7);
       const desiredMod =
-        (360 - (targetIndex * SEGMENT_ANGLE + SEGMENT_ANGLE / 2 + jitter)) % 360;
+        (360 - (targetIndex * segmentAngle + segmentAngle / 2 + jitter)) % 360;
       const extraTurns = 4 + Math.floor(Math.random() * 3); // 4..6 full turns
       const delta =
         extraTurns * 360 + ((desiredMod - (currentRotation % 360)) + 360) % 360;
@@ -109,7 +122,7 @@ export function createSpinner(mount: HTMLElement): Spinner {
         const onEnd = () => {
           wheel.removeEventListener("transitionend", onEnd);
           api.spinning = false;
-          resolve(targetIndex + 1);
+          resolve(numbers[targetIndex]);
         };
         wheel.addEventListener("transitionend", onEnd);
       });
@@ -118,7 +131,7 @@ export function createSpinner(mount: HTMLElement): Spinner {
 
   function currentNumber(): number {
     const atTop = (((-currentRotation) % 360) + 360) % 360;
-    return (Math.floor(atTop / SEGMENT_ANGLE) % SEGMENTS) + 1;
+    return numbers[Math.floor(atTop / segmentAngle) % segments];
   }
 
   return api;

@@ -21,14 +21,25 @@ const checkBtn = document.querySelector<HTMLButtonElement>("#check-btn")!;
 const answerBtn = document.querySelector<HTMLButtonElement>("#answer-btn")!;
 const scoreEl = document.querySelector<HTMLParagraphElement>("#score")!;
 
-function makeWheel() {
+function isPrime(n: number): boolean {
+  if (n < 2) return false;
+  for (let d = 2; d * d <= n; d++) if (n % d === 0) return false;
+  return true;
+}
+
+/** Every non-prime number from 1 to 144 (1 and all composites). */
+const NON_PRIMES = Array.from({ length: 144 }, (_, i) => i + 1).filter((n) => !isPrime(n));
+
+function makeWheel(numbers?: number[]) {
   const wrap = document.createElement("div");
   wrap.className = "wheel-wrap";
   wheelsEl.appendChild(wrap);
-  return { wrap, spinner: createSpinner(wrap) };
+  return { wrap, spinner: createSpinner(wrap, { numbers }) };
 }
 const left = makeWheel();
 const right = makeWheel();
+const divisionWheel = makeWheel(NON_PRIMES); // single wheel used for division
+divisionWheel.wrap.classList.add("division-wheel");
 
 const history: boolean[] = []; // true = answered correctly
 let current: { a: number; b: number; answer: number; symbol: string } | null = null;
@@ -56,9 +67,12 @@ function factorsOf(n: number): number[] {
   return factors;
 }
 
-/** Division uses a single wheel; the second one is hidden. */
+/** Division uses its own single wheel (non-primes up to 144); the others are hidden. */
 function syncWheelVisibility() {
-  right.wrap.hidden = selectedOp() === "divide";
+  const dividing = selectedOp() === "divide";
+  left.wrap.hidden = dividing;
+  right.wrap.hidden = dividing;
+  divisionWheel.wrap.hidden = !dividing;
 }
 
 function stopTimer() {
@@ -98,14 +112,14 @@ function renderScore() {
 /**
  * Spin both wheels and build a question for the chosen operation.
  * - subtraction: always larger − smaller (so the result is never negative)
- * - division: keep spinning until larger ÷ smaller is a whole number
+ * - division: spin the non-primes wheel, divisor is a random factor of it
  */
 async function spinForOperation(
   op: OpKey,
 ): Promise<{ a: number; b: number; answer: number }> {
   if (op === "divide") {
-    // Spin one wheel, then choose a factor of that number as the divisor.
-    const n = await left.spinner.spin();
+    // Spin the non-primes wheel, then choose a factor of that number as the divisor.
+    const n = await divisionWheel.spinner.spin();
     const factors = factorsOf(n);
     const d = factors[Math.floor(Math.random() * factors.length)];
     return { a: n, b: d, answer: n / d };
@@ -119,8 +133,12 @@ async function spinForOperation(
   return { a: ra, b: rb, answer };
 }
 
+function anySpinning(): boolean {
+  return left.spinner.spinning || right.spinner.spinning || divisionWheel.spinner.spinning;
+}
+
 async function spinBoth() {
-  if (left.spinner.spinning || right.spinner.spinning || !resolved) return;
+  if (anySpinning() || !resolved) return;
 
   resolved = false;
   current = null;
@@ -200,13 +218,12 @@ checkBtn.addEventListener("click", submitAnswer);
 answerBtn.addEventListener("click", () => resolveQuestion(null, "reveal"));
 spinBtn.addEventListener("click", spinBoth);
 
-// Preview the one-wheel layout for division when idle (no live question).
+// Preview the right layout for the chosen operation when idle (no live question).
 document.querySelectorAll<HTMLInputElement>('input[name="op"]').forEach((radio) =>
   radio.addEventListener("change", () => {
-    if (resolved && !left.spinner.spinning && !right.spinner.spinning) {
-      syncWheelVisibility();
-    }
+    if (resolved && !anySpinning()) syncWheelVisibility();
   }),
 );
 
+syncWheelVisibility(); // hide the division wheel until ÷ is chosen
 renderScore();
