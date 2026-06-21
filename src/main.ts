@@ -96,7 +96,7 @@ async function spinForOperation(
     let rb: number;
     do {
       [ra, rb] = await Promise.all([left.spin(), right.spin()]);
-    } while (ra === rb || Math.max(ra, rb) % Math.min(ra, rb) !== 0);
+    } while (Math.max(ra, rb) % Math.min(ra, rb) !== 0);
     const a = Math.max(ra, rb);
     const b = Math.min(ra, rb);
     return { a, b, answer: a / b };
