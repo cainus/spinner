@@ -27,8 +27,11 @@ function el<K extends keyof SVGElementTagNameMap>(
 }
 
 export interface Spinner {
-  /** Spin the wheel; resolves with the number under the pointer when it stops. */
-  spin(): Promise<number>;
+  /**
+   * Spin the wheel; resolves with the number under the pointer when it stops.
+   * Pass a number (1..SEGMENTS) to land on a specific value.
+   */
+  spin(forcedNumber?: number): Promise<number>;
   spinning: boolean;
 }
 
@@ -83,10 +86,13 @@ export function createSpinner(mount: HTMLElement): Spinner {
   let currentRotation = 0;
   const api: Spinner = {
     spinning: false,
-    spin() {
+    spin(forcedNumber?: number) {
       if (api.spinning) return Promise.resolve(currentNumber());
 
-      const targetIndex = Math.floor(Math.random() * SEGMENTS);
+      const targetIndex =
+        forcedNumber != null
+          ? (forcedNumber - 1 + SEGMENTS) % SEGMENTS
+          : Math.floor(Math.random() * SEGMENTS);
       // Land the centre of the chosen wedge under the top pointer, with a little jitter.
       const jitter = (Math.random() - 0.5) * (SEGMENT_ANGLE * 0.7);
       const desiredMod =
