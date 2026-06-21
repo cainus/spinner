@@ -9,8 +9,30 @@
   <body>
     <main>
       <h1>Spinner</h1>
-      <div id="app"></div>
-      <p id="result" aria-live="polite"></p>
+      <div id="wheels" class="wheels"></div>
+
+      <div class="controls">
+        <button id="spin-btn">Spin</button>
+      </div>
+
+      <p id="question" aria-live="polite"></p>
+      <div id="timer" class="timer" hidden></div>
+
+      <div class="answer-row">
+        <input
+          id="answer-input"
+          type="text"
+          inputmode="numeric"
+          autocomplete="off"
+          placeholder="Your answer"
+          aria-label="Your answer"
+          disabled
+        />
+        <button id="check-btn" disabled>Check</button>
+        <button id="answer-btn" hidden>See the answer</button>
+      </div>
+
+      <p id="score" class="score" aria-live="polite"></p>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>

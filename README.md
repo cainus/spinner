@@ -1,8 +1,20 @@
 # spinner
 
-A simple TypeScript web app: a spinner like the one in the board game *Life*, but
-with only **8 numbers** (1–8) on it. Click the wheel (or the button) to spin and
-see which number the pointer lands on.
+A small TypeScript web app: a multiplication-practice game built on two
+*Game of Life*–style spinners (numbers **1–12**).
+
+Press **Spin** and both wheels spin to two distinct numbers, forming a
+multiplication question (`a × b = ?`). Then:
+
+- A **15-second countdown** starts once the question is decided.
+- Type your answer (the field accepts **digits only**) and press **Check**
+  (or Enter).
+- Or press **See the answer** to reveal the product.
+- Your **score** is shown as a percentage correct over the latest **15**
+  questions.
+
+Revealing the answer or letting the timer run out counts the question as
+incorrect.
 
 ## Tech
 
