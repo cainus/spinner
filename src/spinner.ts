@@ -1,9 +1,10 @@
-const SEGMENTS = 8;
-const SEGMENT_ANGLE = 360 / SEGMENTS; // 45°
-const NUMBERS = Array.from({ length: SEGMENTS }, (_, i) => i + 1); // 1..8
+const SEGMENTS = 12;
+const SEGMENT_ANGLE = 360 / SEGMENTS; // 30°
+const NUMBERS = Array.from({ length: SEGMENTS }, (_, i) => i + 1); // 1..12
 const COLORS = [
   "#e63946", "#f4a261", "#2a9d8f", "#457b9d",
   "#e76f51", "#8ab17d", "#e9c46a", "#9d4edd",
+  "#ff6b6b", "#1abc9c", "#3d5a80", "#c77dff",
 ];
 
 const SVG = "http://www.w3.org/2000/svg";
