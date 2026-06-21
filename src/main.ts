@@ -25,7 +25,7 @@ function makeWheel() {
   const wrap = document.createElement("div");
   wrap.className = "wheel-wrap";
   wheelsEl.appendChild(wrap);
-  return createSpinner(wrap);
+  return { wrap, spinner: createSpinner(wrap) };
 }
 const left = makeWheel();
 const right = makeWheel();
@@ -47,6 +47,18 @@ function pickTwoDistinct(): [number, number] {
   let b = Math.floor(Math.random() * (SEGMENTS - 1)) + 1;
   if (b >= a) b += 1; // skip a, keeping b a uniform distinct pick
   return [a, b];
+}
+
+/** All factors of n (1..n that divide it). */
+function factorsOf(n: number): number[] {
+  const factors: number[] = [];
+  for (let d = 1; d <= n; d++) if (n % d === 0) factors.push(d);
+  return factors;
+}
+
+/** Division uses a single wheel; the second one is hidden. */
+function syncWheelVisibility() {
+  right.wrap.hidden = selectedOp() === "divide";
 }
 
 function stopTimer() {
@@ -92,30 +104,28 @@ async function spinForOperation(
   op: OpKey,
 ): Promise<{ a: number; b: number; answer: number }> {
   if (op === "divide") {
-    let ra: number;
-    let rb: number;
-    do {
-      [ra, rb] = await Promise.all([left.spin(), right.spin()]);
-    } while (Math.max(ra, rb) % Math.min(ra, rb) !== 0);
-    const a = Math.max(ra, rb);
-    const b = Math.min(ra, rb);
-    return { a, b, answer: a / b };
+    // Spin one wheel, then choose a factor of that number as the divisor.
+    const n = await left.spinner.spin();
+    const factors = factorsOf(n);
+    const d = factors[Math.floor(Math.random() * factors.length)];
+    return { a: n, b: d, answer: n / d };
   }
 
   let [a, b] = pickTwoDistinct();
   if (op === "subtract" && b > a) [a, b] = [b, a]; // larger on the left
-  const [ra, rb] = await Promise.all([left.spin(a), right.spin(b)]);
+  const [ra, rb] = await Promise.all([left.spinner.spin(a), right.spinner.spin(b)]);
   const answer =
     op === "add" ? ra + rb : op === "subtract" ? ra - rb : ra * rb;
   return { a: ra, b: rb, answer };
 }
 
 async function spinBoth() {
-  if (left.spinning || right.spinning || !resolved) return;
+  if (left.spinner.spinning || right.spinner.spinning || !resolved) return;
 
   resolved = false;
   current = null;
   stopTimer();
+  syncWheelVisibility();
   spinBtn.disabled = true;
   answerBtn.hidden = true;
   inputEl.disabled = true;
@@ -189,5 +199,14 @@ inputEl.addEventListener("keydown", (e) => {
 checkBtn.addEventListener("click", submitAnswer);
 answerBtn.addEventListener("click", () => resolveQuestion(null, "reveal"));
 spinBtn.addEventListener("click", spinBoth);
+
+// Preview the one-wheel layout for division when idle (no live question).
+document.querySelectorAll<HTMLInputElement>('input[name="op"]').forEach((radio) =>
+  radio.addEventListener("change", () => {
+    if (resolved && !left.spinner.spinning && !right.spinner.spinning) {
+      syncWheelVisibility();
+    }
+  }),
+);
 
 renderScore();
