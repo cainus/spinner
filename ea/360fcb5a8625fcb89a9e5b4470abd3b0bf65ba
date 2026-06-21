@@ -1,0 +1,23 @@
+src/main.ts
+  s_1e9d46eace50b0::t_c15577542b9bfb 7-14,34,39-43,86-112,128-131,134,149-150,161,163,165,167
+index.html
+  s_1e9d46eace50b0::t_acaea4fe0da646 14-20
+src/style.css
+  s_1e9d46eace50b0::t_434e7adf2a5a22 66-110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "ea360fcb5a8625fcb89a9e5b4470abd3b0bf65ba",
+  "prompts": {},
+  "sessions": {
+    "s_1e9d46eace50b0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d2578de4-e26f-4a00-9382-8b9f34dafaa8",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Greggory Caines <gregg@caines.ca>"
+    }
+  }
+}
