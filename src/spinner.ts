@@ -50,12 +50,15 @@ export function createSpinner(mount: HTMLElement): Spinner {
     });
     wheel.appendChild(path);
 
-    const [lx, ly] = pointAt(start + SEGMENT_ANGLE / 2, RADIUS * 0.66);
+    const mid = start + SEGMENT_ANGLE / 2;
+    const [lx, ly] = pointAt(mid, RADIUS * 0.66);
     const label = el("text", {
       x: lx,
       y: ly,
       "text-anchor": "middle",
       "dominant-baseline": "central",
+      // Rotate the digit to align with the slice's tangent (perpendicular to its radius).
+      transform: `rotate(${mid} ${lx} ${ly})`,
       class: "wheel-label",
     });
     label.textContent = String(NUMBERS[i]);
