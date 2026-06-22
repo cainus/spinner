@@ -30,15 +30,16 @@ function isPrime(n: number): boolean {
 /** Every non-prime number from 1 to 144 (1 and all composites). */
 const NON_PRIMES = Array.from({ length: 144 }, (_, i) => i + 1).filter((n) => !isPrime(n));
 
-function makeWheel(numbers?: number[]) {
+function makeWheel(options?: { numbers?: number[]; orientation?: "tangent" | "radial" }) {
   const wrap = document.createElement("div");
   wrap.className = "wheel-wrap";
   wheelsEl.appendChild(wrap);
-  return { wrap, spinner: createSpinner(wrap, { numbers }) };
+  return { wrap, spinner: createSpinner(wrap, options) };
 }
 const left = makeWheel();
 const right = makeWheel();
-const divisionWheel = makeWheel(NON_PRIMES); // single wheel used for division
+// Single, larger wheel of every non-prime up to 144, with radial labels.
+const divisionWheel = makeWheel({ numbers: NON_PRIMES, orientation: "radial" });
 divisionWheel.wrap.classList.add("division-wheel");
 
 const history: boolean[] = []; // true = answered correctly

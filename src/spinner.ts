@@ -36,16 +36,24 @@ export interface Spinner {
 export interface SpinnerOptions {
   /** The numbers shown on the wheel, in order. Defaults to 1..12. */
   numbers?: number[];
+  /**
+   * How each label is rotated:
+   * - "tangent": along the slice's tangent (default)
+   * - "radial": along the slice's radius — leaves room for multi-digit numbers
+   */
+  orientation?: "tangent" | "radial";
 }
 
 export function createSpinner(mount: HTMLElement, options: SpinnerOptions = {}): Spinner {
   const numbers = options.numbers ?? DEFAULT_NUMBERS;
+  const orientation = options.orientation ?? "tangent";
   const segments = numbers.length;
   const segmentAngle = 360 / segments;
 
   // Scale labels and outlines so dense wheels stay legible.
   const fontSize = Math.max(4, Math.min(22, segmentAngle * 0.7));
-  const labelRadius = RADIUS * (segments > 24 ? 0.8 : 0.66);
+  const labelRadius =
+    RADIUS * (orientation === "radial" ? 0.62 : segments > 24 ? 0.8 : 0.66);
   const strokeWidth = segments > 24 ? 0.3 : 1;
 
   const svg = el("svg", { viewBox: "0 0 200 200", class: "wheel-svg" });
@@ -68,14 +76,16 @@ export function createSpinner(mount: HTMLElement, options: SpinnerOptions = {}):
 
     const mid = start + segmentAngle / 2;
     const [lx, ly] = pointAt(mid, labelRadius);
+    // Tangent labels rotate by the mid angle; radial labels turn a further 90°
+    // so the digits run outward along the radius.
+    const labelAngle = orientation === "radial" ? mid - 90 : mid;
     const label = el("text", {
       x: lx,
       y: ly,
       "text-anchor": "middle",
       "dominant-baseline": "central",
       "font-size": fontSize,
-      // Rotate the digit to align with the slice's tangent (perpendicular to its radius).
-      transform: `rotate(${mid} ${lx} ${ly})`,
+      transform: `rotate(${labelAngle} ${lx} ${ly})`,
       class: "wheel-label",
     });
     label.textContent = String(numbers[i]);

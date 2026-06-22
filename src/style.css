@@ -38,7 +38,7 @@ h1 {
 }
 
 .wheel-wrap.division-wheel {
-  width: min(86vw, 440px);
+  width: min(94vw, 600px);
 }
 
 .wheel-svg {
