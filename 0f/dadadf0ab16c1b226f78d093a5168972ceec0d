@@ -1,0 +1,25 @@
+src/main.ts
+  s_1e9d46eace50b0::t_5f51ef983c9527 62-65
+  s_1e9d46eace50b0::t_b3ed417abdadb8 40-41,44-46
+  s_1e9d46eace50b0::t_97cbe55c9a5e68 77,79-85
+  s_1e9d46eace50b0::t_c326899ca1cc94 123-124,139-145,148,153-159
+  s_1e9d46eace50b0::t_e1c80eca213630 3-4
+README.md
+  s_1e9d46eace50b0::t_58fb1d827fb23f 16-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "0fdadadf0ab16c1b226f78d093a5168972ceec0d",
+  "prompts": {},
+  "sessions": {
+    "s_1e9d46eace50b0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d2578de4-e26f-4a00-9382-8b9f34dafaa8",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Greggory Caines <gregg@caines.ca>"
+    }
+  }
+}
