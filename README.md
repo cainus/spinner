@@ -13,6 +13,9 @@ multiplication question (`a × b = ?`). Then:
 - Your **score** is shown as a percentage correct over the latest **15**
   questions.
 
+Addition uses a dedicated pair of wheels with double the range (**1–24**);
+subtraction and multiplication use **1–12** wheels.
+
 For division, a single dedicated wheel containing every non-prime number from
 1 to 144 spins, and the divisor is chosen as a random factor of that number,
 so the answer is always a whole number.

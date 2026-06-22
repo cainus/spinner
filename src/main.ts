@@ -1,6 +1,7 @@
 import { createSpinner } from "./spinner.ts";
 
-const SEGMENTS = 12;
+const SEGMENTS = 12; // numbers on the −/× wheels
+const ADD_SEGMENTS = 24; // addition uses double the range
 const COUNTDOWN_SECONDS = 15;
 const HISTORY_LIMIT = 15; // only the latest 15 questions count toward the score
 
@@ -36,8 +37,13 @@ function makeWheel(options?: { numbers?: number[]; orientation?: "tangent" | "ra
   wheelsEl.appendChild(wrap);
   return { wrap, spinner: createSpinner(wrap, options) };
 }
+const range = (max: number) => Array.from({ length: max }, (_, i) => i + 1);
+
 const left = makeWheel();
 const right = makeWheel();
+// Addition gets its own pair of wheels with double the range (1..24).
+const addLeft = makeWheel({ numbers: range(ADD_SEGMENTS) });
+const addRight = makeWheel({ numbers: range(ADD_SEGMENTS) });
 // Single, larger wheel of every non-prime up to 144, with radial labels.
 const divisionWheel = makeWheel({ numbers: NON_PRIMES, orientation: "radial" });
 divisionWheel.wrap.classList.add("division-wheel");
@@ -53,10 +59,10 @@ function selectedOp(): OpKey {
   return (checked?.value as OpKey) ?? "multiply";
 }
 
-/** Pick two distinct numbers in 1..SEGMENTS. */
-function pickTwoDistinct(): [number, number] {
-  const a = Math.floor(Math.random() * SEGMENTS) + 1;
-  let b = Math.floor(Math.random() * (SEGMENTS - 1)) + 1;
+/** Pick two distinct numbers in 1..max. */
+function pickTwoDistinct(max: number): [number, number] {
+  const a = Math.floor(Math.random() * max) + 1;
+  let b = Math.floor(Math.random() * (max - 1)) + 1;
   if (b >= a) b += 1; // skip a, keeping b a uniform distinct pick
   return [a, b];
 }
@@ -68,12 +74,15 @@ function factorsOf(n: number): number[] {
   return factors;
 }
 
-/** Division uses its own single wheel (non-primes up to 144); the others are hidden. */
+/** Show only the wheels the chosen operation uses. */
 function syncWheelVisibility() {
-  const dividing = selectedOp() === "divide";
-  left.wrap.hidden = dividing;
-  right.wrap.hidden = dividing;
-  divisionWheel.wrap.hidden = !dividing;
+  const op = selectedOp();
+  const usesDefault = op === "subtract" || op === "multiply";
+  left.wrap.hidden = !usesDefault;
+  right.wrap.hidden = !usesDefault;
+  addLeft.wrap.hidden = op !== "add";
+  addRight.wrap.hidden = op !== "add";
+  divisionWheel.wrap.hidden = op !== "divide";
 }
 
 function stopTimer() {
@@ -111,7 +120,8 @@ function renderScore() {
 }
 
 /**
- * Spin both wheels and build a question for the chosen operation.
+ * Spin the relevant wheels and build a question for the chosen operation.
+ * - addition: dedicated 1..24 wheels (double the default range)
  * - subtraction: always larger − smaller (so the result is never negative)
  * - division: spin the non-primes wheel, divisor is a random factor of it
  */
@@ -126,16 +136,27 @@ async function spinForOperation(
     return { a: n, b: d, answer: n / d };
   }
 
-  let [a, b] = pickTwoDistinct();
+  if (op === "add") {
+    const [a, b] = pickTwoDistinct(ADD_SEGMENTS);
+    const [ra, rb] = await Promise.all([addLeft.spinner.spin(a), addRight.spinner.spin(b)]);
+    return { a: ra, b: rb, answer: ra + rb };
+  }
+
+  let [a, b] = pickTwoDistinct(SEGMENTS);
   if (op === "subtract" && b > a) [a, b] = [b, a]; // larger on the left
   const [ra, rb] = await Promise.all([left.spinner.spin(a), right.spinner.spin(b)]);
-  const answer =
-    op === "add" ? ra + rb : op === "subtract" ? ra - rb : ra * rb;
+  const answer = op === "subtract" ? ra - rb : ra * rb;
   return { a: ra, b: rb, answer };
 }
 
 function anySpinning(): boolean {
-  return left.spinner.spinning || right.spinner.spinning || divisionWheel.spinner.spinning;
+  return (
+    left.spinner.spinning ||
+    right.spinner.spinning ||
+    addLeft.spinner.spinning ||
+    addRight.spinner.spinning ||
+    divisionWheel.spinner.spinning
+  );
 }
 
 async function spinBoth() {
