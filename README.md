@@ -1,7 +1,14 @@
 # spinner
 
-A small TypeScript web app: a multiplication-practice game built on two
-*Game of Life*–style spinners (numbers **1–12**).
+A small TypeScript web app with two modes (switch via the tabs at the top):
+
+- **Math** — an arithmetic-practice game built on *Game of Life*–style spinners.
+- **Spinners** — a gallery of 16 themed wheels (Professions, Colors, Numbers,
+  Holidays, Seasons, TV Shows, Animals, Fruits, Countries, Sports, Instruments,
+  Planets, Emotions, Weather, Pizza Toppings, Board Games). Pick a category and
+  spin to land on a random item.
+
+## Math mode
 
 Press **Spin** and both wheels spin to two distinct numbers, forming a
 multiplication question (`a × b = ?`). Then:

@@ -23,6 +23,65 @@ h1 {
   letter-spacing: 0.02em;
 }
 
+.tabs {
+  display: inline-flex;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+  padding: 0.3rem;
+  background: #e7e5e4;
+  border-radius: 999px;
+}
+
+.tab {
+  padding: 0.5rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1d1d1d;
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tab.is-active {
+  background: #1d1d1d;
+  color: #fff;
+}
+
+.fun-pick {
+  display: block;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+#category {
+  margin-left: 0.4rem;
+  padding: 0.45rem 0.7rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid #1d1d1d;
+  border-radius: 10px;
+  background: #fff;
+  color: #1d1d1d;
+  cursor: pointer;
+}
+
+.wheel-wrap.fun-wheel {
+  width: min(86vw, 420px);
+}
+
+.fun-result {
+  margin-top: 1.5rem;
+  font-size: 1.7rem;
+  font-weight: 700;
+  min-height: 1.6em;
+}
+
+.fun-result.landed {
+  color: #2a9d8f;
+}
+
 .wheels {
   display: flex;
   flex-wrap: wrap;
@@ -111,7 +170,8 @@ h1 {
   outline-offset: 2px;
 }
 
-#spin-btn {
+#spin-btn,
+#fun-spin-btn {
   margin-top: 1.75rem;
   padding: 0.7rem 2.2rem;
   font-size: 1.1rem;
@@ -124,11 +184,13 @@ h1 {
   transition: transform 0.1s ease, opacity 0.2s ease;
 }
 
-#spin-btn:hover:not(:disabled) {
+#spin-btn:hover:not(:disabled),
+#fun-spin-btn:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
-#spin-btn:disabled {
+#spin-btn:disabled,
+#fun-spin-btn:disabled {
   opacity: 0.5;
   cursor: default;
 }

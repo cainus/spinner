@@ -9,37 +9,60 @@
   <body>
     <main>
       <h1>Spinner</h1>
-      <div id="wheels" class="wheels"></div>
 
-      <div id="ops" class="ops" role="radiogroup" aria-label="Operation">
-        <label><input type="radio" name="op" value="add" /><span>+</span></label>
-        <label><input type="radio" name="op" value="subtract" /><span>−</span></label>
-        <label><input type="radio" name="op" value="multiply" checked /><span>×</span></label>
-        <label><input type="radio" name="op" value="divide" /><span>÷</span></label>
-      </div>
+      <nav class="tabs" aria-label="Mode">
+        <button class="tab is-active" data-tab="math">Math</button>
+        <button class="tab" data-tab="fun">Spinners</button>
+      </nav>
 
-      <div class="controls">
-        <button id="spin-btn">Spin</button>
-      </div>
+      <section id="math-section">
+        <div id="wheels" class="wheels"></div>
 
-      <p id="question" aria-live="polite"></p>
-      <div id="timer" class="timer" hidden></div>
+        <div id="ops" class="ops" role="radiogroup" aria-label="Operation">
+          <label><input type="radio" name="op" value="add" /><span>+</span></label>
+          <label><input type="radio" name="op" value="subtract" /><span>−</span></label>
+          <label><input type="radio" name="op" value="multiply" checked /><span>×</span></label>
+          <label><input type="radio" name="op" value="divide" /><span>÷</span></label>
+        </div>
 
-      <div class="answer-row">
-        <input
-          id="answer-input"
-          type="text"
-          inputmode="numeric"
-          autocomplete="off"
-          placeholder="Your answer"
-          aria-label="Your answer"
-          disabled
-        />
-        <button id="check-btn" disabled>Check</button>
-        <button id="answer-btn" hidden>See the answer</button>
-      </div>
+        <div class="controls">
+          <button id="spin-btn">Spin</button>
+        </div>
 
-      <p id="score" class="score" aria-live="polite"></p>
+        <p id="question" aria-live="polite"></p>
+        <div id="timer" class="timer" hidden></div>
+
+        <div class="answer-row">
+          <input
+            id="answer-input"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            placeholder="Your answer"
+            aria-label="Your answer"
+            disabled
+          />
+          <button id="check-btn" disabled>Check</button>
+          <button id="answer-btn" hidden>See the answer</button>
+        </div>
+
+        <p id="score" class="score" aria-live="polite"></p>
+      </section>
+
+      <section id="fun-section" hidden>
+        <label class="fun-pick">
+          Category:
+          <select id="category" aria-label="Category"></select>
+        </label>
+
+        <div id="fun-wheels" class="wheels"></div>
+
+        <div class="controls">
+          <button id="fun-spin-btn">Spin</button>
+        </div>
+
+        <p id="fun-result" class="fun-result" aria-live="polite"></p>
+      </section>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>

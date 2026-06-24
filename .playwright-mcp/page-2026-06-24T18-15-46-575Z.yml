@@ -1,0 +1,39 @@
+- main [ref=e2]:
+  - heading "Spinner" [level=1] [ref=e3]
+  - navigation "Mode" [ref=e4]:
+    - button "Math" [ref=e5] [cursor=pointer]
+    - button "Spinners" [ref=e6] [cursor=pointer]
+  - generic [ref=e61]:
+    - generic [ref=e62]:
+      - text: "Category:"
+      - combobox "Category" [ref=e63] [cursor=pointer]:
+        - option "Professions"
+        - option "Colors"
+        - option "Numbers"
+        - option "Holidays"
+        - option "Seasons"
+        - option "TV Shows" [selected]
+        - option "Animals"
+        - option "Fruits"
+        - option "Countries"
+        - option "Sports"
+        - option "Instruments"
+        - option "Planets"
+        - option "Emotions"
+        - option "Weather"
+        - option "Pizza Toppings"
+        - option "Board Games"
+    - img [ref=e66]:
+      - generic [ref=e67]:
+        - generic: Friends
+        - generic: The Office
+        - generic: Stranger Things
+        - generic: Breaking Bad
+        - generic: Game of Thrones
+        - generic: The Simpsons
+        - generic: Seinfeld
+        - generic: SpongeBob
+        - generic: Doctor Who
+        - generic: The Mandalorian
+    - button "Spin" [ref=e81] [cursor=pointer]
+    - paragraph [ref=e82]: 🎯 The Mandalorian

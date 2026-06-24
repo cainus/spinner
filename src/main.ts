@@ -1,4 +1,5 @@
 import { createSpinner } from "./spinner.ts";
+import { initFunSpinners } from "./fun.ts";
 
 const SEGMENTS = 12; // numbers on the −/× wheels
 const ADD_SEGMENTS = 24; // addition uses double the range
@@ -125,12 +126,17 @@ function renderScore() {
  * - subtraction: always larger − smaller (so the result is never negative)
  * - division: spin the non-primes wheel, divisor is a random factor of it
  */
+/** The wheels carry string labels; this spins one and returns the landed number. */
+function spinNumber(wheel: ReturnType<typeof makeWheel>, forced?: number): Promise<number> {
+  return wheel.spinner.spin(forced === undefined ? undefined : String(forced)).then(Number);
+}
+
 async function spinForOperation(
   op: OpKey,
 ): Promise<{ a: number; b: number; answer: number }> {
   if (op === "divide") {
     // Spin the non-primes wheel, then choose a factor of that number as the divisor.
-    const n = await divisionWheel.spinner.spin();
+    const n = await spinNumber(divisionWheel);
     const factors = factorsOf(n);
     const d = factors[Math.floor(Math.random() * factors.length)];
     return { a: n, b: d, answer: n / d };
@@ -138,13 +144,13 @@ async function spinForOperation(
 
   if (op === "add") {
     const [a, b] = pickTwoDistinct(ADD_SEGMENTS);
-    const [ra, rb] = await Promise.all([addLeft.spinner.spin(a), addRight.spinner.spin(b)]);
+    const [ra, rb] = await Promise.all([spinNumber(addLeft, a), spinNumber(addRight, b)]);
     return { a: ra, b: rb, answer: ra + rb };
   }
 
   let [a, b] = pickTwoDistinct(SEGMENTS);
   if (op === "subtract" && b > a) [a, b] = [b, a]; // larger on the left
-  const [ra, rb] = await Promise.all([left.spinner.spin(a), right.spinner.spin(b)]);
+  const [ra, rb] = await Promise.all([spinNumber(left, a), spinNumber(right, b)]);
   const answer = op === "subtract" ? ra - rb : ra * rb;
   return { a: ra, b: rb, answer };
 }
@@ -249,3 +255,20 @@ document.querySelectorAll<HTMLInputElement>('input[name="op"]').forEach((radio) 
 
 syncWheelVisibility(); // hide the division wheel until ÷ is chosen
 renderScore();
+
+// Tab switching between the math game and the themed spinners.
+const mathSection = document.querySelector<HTMLElement>("#math-section")!;
+const funSection = document.querySelector<HTMLElement>("#fun-section")!;
+document.querySelectorAll<HTMLButtonElement>(".tab").forEach((tab) =>
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("is-active", t === tab));
+    const showMath = tab.dataset.tab === "math";
+    mathSection.hidden = !showMath;
+    funSection.hidden = showMath;
+    // The countdown is fixed-position; don't let it linger over the other tab.
+    stopTimer();
+    timerEl.hidden = true;
+  }),
+);
+
+initFunSpinners();

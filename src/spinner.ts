@@ -1,4 +1,4 @@
-const DEFAULT_NUMBERS = Array.from({ length: 12 }, (_, i) => i + 1); // 1..12
+const DEFAULT_ITEMS = Array.from({ length: 12 }, (_, i) => String(i + 1)); // "1".."12"
 const COLORS = [
   "#e63946", "#f4a261", "#2a9d8f", "#457b9d",
   "#e76f51", "#8ab17d", "#e9c46a", "#9d4edd",
@@ -26,32 +26,36 @@ function el<K extends keyof SVGElementTagNameMap>(
 
 export interface Spinner {
   /**
-   * Spin the wheel; resolves with the number under the pointer when it stops.
+   * Spin the wheel; resolves with the item under the pointer when it stops.
    * Pass a value present on the wheel to land on it; omit for a random landing.
    */
-  spin(forcedNumber?: number): Promise<number>;
+  spin(forcedItem?: string): Promise<string>;
   spinning: boolean;
 }
 
 export interface SpinnerOptions {
-  /** The numbers shown on the wheel, in order. Defaults to 1..12. */
+  /** The labels shown on the wheel, in order. Defaults to "1".."12". */
+  items?: string[];
+  /** Convenience for numeric wheels — converted to string items. */
   numbers?: number[];
   /**
    * How each label is rotated:
    * - "tangent": along the slice's tangent (default)
-   * - "radial": along the slice's radius — leaves room for multi-digit numbers
+   * - "radial": along the slice's radius — leaves room for long labels
    */
   orientation?: "tangent" | "radial";
+  /** Override the auto-computed label font size. */
+  fontSize?: number;
 }
 
 export function createSpinner(mount: HTMLElement, options: SpinnerOptions = {}): Spinner {
-  const numbers = options.numbers ?? DEFAULT_NUMBERS;
+  const items = options.items ?? options.numbers?.map(String) ?? DEFAULT_ITEMS;
   const orientation = options.orientation ?? "tangent";
-  const segments = numbers.length;
+  const segments = items.length;
   const segmentAngle = 360 / segments;
 
   // Scale labels and outlines so dense wheels stay legible.
-  const fontSize = Math.max(4, Math.min(22, segmentAngle * 0.7));
+  const fontSize = options.fontSize ?? Math.max(4, Math.min(22, segmentAngle * 0.7));
   const labelRadius =
     RADIUS * (orientation === "radial" ? 0.62 : segments > 24 ? 0.8 : 0.66);
   const strokeWidth = segments > 24 ? 0.3 : 1;
@@ -88,7 +92,7 @@ export function createSpinner(mount: HTMLElement, options: SpinnerOptions = {}):
       transform: `rotate(${labelAngle} ${lx} ${ly})`,
       class: "wheel-label",
     });
-    label.textContent = String(numbers[i]);
+    label.textContent = items[i];
     wheel.appendChild(label);
   }
 
@@ -109,11 +113,11 @@ export function createSpinner(mount: HTMLElement, options: SpinnerOptions = {}):
   let currentRotation = 0;
   const api: Spinner = {
     spinning: false,
-    spin(forcedNumber?: number) {
-      if (api.spinning) return Promise.resolve(currentNumber());
+    spin(forcedItem?: string) {
+      if (api.spinning) return Promise.resolve(currentItem());
 
       let targetIndex =
-        forcedNumber != null ? numbers.indexOf(forcedNumber) : Math.floor(Math.random() * segments);
+        forcedItem != null ? items.indexOf(forcedItem) : Math.floor(Math.random() * segments);
       if (targetIndex < 0) targetIndex = 0;
 
       // Land the centre of the chosen wedge under the top pointer, with a little jitter.
@@ -128,20 +132,20 @@ export function createSpinner(mount: HTMLElement, options: SpinnerOptions = {}):
       api.spinning = true;
       wheel.style.transform = `rotate(${currentRotation}deg)`;
 
-      return new Promise<number>((resolve) => {
+      return new Promise<string>((resolve) => {
         const onEnd = () => {
           wheel.removeEventListener("transitionend", onEnd);
           api.spinning = false;
-          resolve(numbers[targetIndex]);
+          resolve(items[targetIndex]);
         };
         wheel.addEventListener("transitionend", onEnd);
       });
     },
   };
 
-  function currentNumber(): number {
+  function currentItem(): string {
     const atTop = (((-currentRotation) % 360) + 360) % 360;
-    return numbers[Math.floor(atTop / segmentAngle) % segments];
+    return items[Math.floor(atTop / segmentAngle) % segments];
   }
 
   return api;
