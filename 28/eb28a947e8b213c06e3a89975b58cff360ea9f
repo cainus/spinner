@@ -1,0 +1,40 @@
+src/spinner.ts
+  s_1e9d46eace50b0::t_d5d02541471d98 135,139
+  s_1e9d46eace50b0::t_f7217e75fa86b4 146,148
+  s_1e9d46eace50b0::t_d0fb89d3a2c574 29,32,37-39,44,47-48,52,54,58
+  s_1e9d46eace50b0::t_1f8ff2d6e47665 1
+  s_1e9d46eace50b0::t_b2924cc25bf4b1 95
+  s_1e9d46eace50b0::t_121006b0cea1a0 116-117,120
+src/themes.ts
+  s_1e9d46eace50b0::t_186ce76fb28ed1 1-72
+src/main.ts
+  s_1e9d46eace50b0::t_8261cdc2ed8ecb 2
+  s_1e9d46eace50b0::t_ff056b28146b06 129-133,139,147,153
+  s_1e9d46eace50b0::t_cad646b0562f65 268-270
+  s_1e9d46eace50b0::t_3c3d2ba16de3bd 258-267,271-274
+src/fun.ts
+  s_1e9d46eace50b0::t_5417437c0b5dee 1-48
+src/style.css
+  s_1e9d46eace50b0::t_cc0739f0f80083 173-174,187-188,192-193
+  s_1e9d46eace50b0::t_bead4ccc3b434a 26-84
+index.html
+  s_1e9d46eace50b0::t_28777d9cb47045 12-65
+README.md
+  s_1e9d46eace50b0::t_a4201e82e7c955 3-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.11",
+  "base_commit_sha": "28eb28a947e8b213c06e3a89975b58cff360ea9f",
+  "prompts": {},
+  "sessions": {
+    "s_1e9d46eace50b0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d2578de4-e26f-4a00-9382-8b9f34dafaa8",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Greggory Caines <gregg@caines.ca>"
+    }
+  }
+}
